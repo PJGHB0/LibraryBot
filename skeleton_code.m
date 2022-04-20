@@ -1,13 +1,19 @@
 %% Section for testing 
+clf;
+clear;
+clc;
+
 myRobot = UR5(false);
 myRobot.model.teach();
+myRobot.model.base
+% myRobot.model.
 
 
 
 
 
 
-%% 
+%% Skeleton code
 %dh parameter
 %GUI
 %create a robot class for hans_cute
@@ -65,4 +71,16 @@ myRobot.model.teach();
 
 %function = grip_action
 
-
+%% Examples on class structure
+% Examples below-----------------------
+% function obj = untitled(inputArg1,inputArg2)
+%     %UNTITLED Construct an instance of this class
+%     %   Detailed explanation goes here
+%     obj.Property1 = inputArg1 + inputArg2;
+% end
+% function outputArg = method1(obj,inputArg)
+%     %METHOD1 Summary of this method goes here
+%     %   Detailed explanation goes here
+%     outputArg = obj.Property1 + inputArg;
+% end
+% -------------------------------------
