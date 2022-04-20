@@ -1,6 +1,6 @@
 %% Section for testing 
-myRobot = UR5(false);
-myRobot.model.teach();
+myrobot = UR
+
 
 
 
