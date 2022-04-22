@@ -8,7 +8,8 @@ myRobot.model.teach();
 myRobot.model.base
 % myRobot.model.
 
-
+myHC = HansCute();
+myHC.model.base
 
 
 

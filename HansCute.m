@@ -9,8 +9,8 @@ classdef HansCute < handle %HansCuteRobot class
             self.GetHCRobot();
             self.PlotAndColourRobot();
         end
-        function GetHCRobot (self) %Creates the robot model
-            pause(0.001); %Idk why we use this, but it was in UR5 code...
+        function GetHCRobot (self) %Creates the robot model (self.model)
+            pause(0.01); %Idk why we use this, but it was in UR5 code...
             L1 = Link('d',0.0892,'a',0,'alpha',-pi/2,'offset',0,'qlim',[deg2rad(-360),deg2rad(360)]);
             L2 = Link('d',0.1357,'a',0.425,'alpha',-pi,'offset',-pi/2,'qlim',[deg2rad(-90),deg2rad(90)]);
             L3 = Link('d',0.1197,'a',0.39243,'alpha',pi,'offset',0,'qlim',[deg2rad(-170),deg2rad(170)]);
@@ -22,7 +22,7 @@ classdef HansCute < handle %HansCuteRobot class
         function PlotAndColourRobot (self)
             %Currently does nothing (need to implement)
         end
-        function SetBaseLocation (
+        
     end
 end
 
