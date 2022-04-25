@@ -3,15 +3,22 @@ clf;
 clear;
 clc;
 
-myRobot = UR5(false);
-myRobot.model.teach();
-myRobot.model.base
+% myRobot = UR5(false);
+% myRobot.model.teach();
+% myRobot.model.base
 % myRobot.model.
 
 myHC = HansCute();
-myHC.model.base
+myHC.model.base %show default base
+myHC.model.base = transl(0,0,1);
+myHC.model.base %show updated base (should be 0 0 1)
 
+scale = 0.4;
+workspace = [-2 2 -2 2 0 4]; %default workspace, %[xmin xmax ymin ymax zmin zmax]  
+qZeroes = [0,0,0,0,0,0]; 
+myHC.model.plot(qZeroes,'workspace',workspace,'scale',scale);
 
+EFTransform = myHC.model.fkine(qZeroes)
 
 
 %% Skeleton code

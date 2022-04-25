@@ -2,7 +2,6 @@
 classdef HansCute < handle %HansCuteRobot class
     properties %all of the variables
         model; %Robot model 
-        workspace = [-2 2 -2 2 -0.3 2]; %default workspace  
     end
     methods
         function self = HansCute() %Things to do on class creation
@@ -11,6 +10,7 @@ classdef HansCute < handle %HansCuteRobot class
         end
         function GetHCRobot (self) %Creates the robot model (self.model)
             pause(0.01); %Idk why we use this, but it was in UR5 code...
+            %CORRECT DH PARAMETERS NEED TO BE ADDED
             L1 = Link('d',0.0892,'a',0,'alpha',-pi/2,'offset',0,'qlim',[deg2rad(-360),deg2rad(360)]);
             L2 = Link('d',0.1357,'a',0.425,'alpha',-pi,'offset',-pi/2,'qlim',[deg2rad(-90),deg2rad(90)]);
             L3 = Link('d',0.1197,'a',0.39243,'alpha',pi,'offset',0,'qlim',[deg2rad(-170),deg2rad(170)]);
@@ -22,7 +22,6 @@ classdef HansCute < handle %HansCuteRobot class
         function PlotAndColourRobot (self)
             %Currently does nothing (need to implement)
         end
-        
     end
 end
 
