@@ -9,17 +9,17 @@ clc;
 % myRobot.model.
 
 myHC = HansCute();
-myHC.model.base %show default base
-myHC.model.base = transl(0,0,1);
-myHC.model.base %show updated base (should be 0 0 1)
+EFTransform = myHC.model.fkine(myHC.qCurrent); 
+myHC.stopVariable
+myHC.model.base()
 
-scale = 0.4;
-workspace = [-2 2 -2 2 0 4]; %default workspace, %[xmin xmax ymin ymax zmin zmax]  
-qZeroes = [0,0,0,0,0,0]; 
-myHC.model.plot(qZeroes,'workspace',workspace,'scale',scale);
-
-EFTransform = myHC.model.fkine(qZeroes)
-
+testTransform = transl(1.3,2.4,3.1);
+testTransform(2,4)
+testBase = myHC.model.base();
+testBase(3,4)
+testBase(1,4)
+myHC.qCurrent = [0.2 0.2 0.2 0.2 0.2 0.2];
+temp = myHC.GetArmVerticies(myHC.qCurrent)
 
 %% Skeleton code
 %dh parameter
