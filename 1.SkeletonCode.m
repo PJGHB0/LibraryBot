@@ -18,7 +18,7 @@ testTransform(2,4)
 testBase = myHC.model.base();
 testBase(3,4)
 testBase(1,4)
-myHC.qCurrent = [0.2 0.2 0.2 0.2 0.2 0.2];
+myHC.qCurrent = [0.2 0.2 0.2 0.2 0.2 0.2 0.2];
 temp = myHC.GetArmVerticies(myHC.qCurrent)
 
 %% Skeleton code
