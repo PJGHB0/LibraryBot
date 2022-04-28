@@ -3,11 +3,11 @@ classdef HansCute < handle %HansCuteRobot class
     properties %all of the variables
         model; %Robot model 
         gripperBool = false; %False for gripper open (not on)
-        qCurrent = [0 0 0 0 0 0 0]; %ALWAYS plot using qCurrent. when plotting, change this value and sent it to the model
-        workspace = [-2 2 -2 2 0 4];
-        scale = 0.4;
+        qCurrent = [0 0 0 0 0 0 0]; %ALWAYS plot using qCurrent. when plotting, change this value and sent it to the model. Note, that the current configuration is actually self.getpos
+        workspace = [-0.6 0.6 -0.6 0.6 -0.6 1];
+        scale = 0.5;
         stopVariable = [false false] %First part is whether the machine is stopped. Second is true for collision, false for estop
-    
+        
         %DH Params
         DH_d = [0.12 0 0.1408 0 0 0 0.1296];
         DH_a = [0 0 0 0.0718 0.0718 0 0];
@@ -22,15 +22,14 @@ classdef HansCute < handle %HansCuteRobot class
         end
         function GetHCRobot (self) %Creates the robot model (self.model)
             pause(0.01); %Idk why we use this, but it was in UR5 code...
-            %CORRECT DH PARAMETERS NEED TO BE ADDED
             for n = 1:7
-                L(n) = Link('d',self.DH_d(n),'a',self.DH_a(n),'alpha',self.DH_alpha(n),'offset',self.DH_offset(n),'qlim',self.DH_qlim(1,:));
+                L(n) = Link('d',self.DH_d(n),'a',self.DH_a(n),'alpha',self.DH_alpha(n),'offset',self.DH_offset(n),'qlim',self.DH_qlim(n,:));
             end
             self.model = SerialLink([L(1) L(2) L(3) L(4) L(5) L(6) L(7)],'name',"HansCute");
         end
         function PlotAndColourRobot (self) %Part of class initialisation
             %Currently does not Colour robot (need to implement)
-            self.model.base = transl(0,0,1);
+            self.model.base = transl(0,0,0);
             self.model.plot(self.qCurrent,'workspace',self.workspace,'scale',self.scale); %Now the robot is plotted, and we do NOT have to plot it ever again (we simply animate it)
             view(45,25); %Set an appropriate view angle
         end

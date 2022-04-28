@@ -1,26 +1,3 @@
-%% Section for testing 
-clf;
-clear;
-clc;
-
-% myRobot = UR5(false);
-% myRobot.model.teach();
-% myRobot.model.base
-% myRobot.model.
-
-myHC = HansCute();
-EFTransform = myHC.model.fkine(myHC.qCurrent); 
-myHC.stopVariable
-myHC.model.base()
-
-testTransform = transl(1.3,2.4,3.1);
-testTransform(2,4)
-testBase = myHC.model.base();
-testBase(3,4)
-testBase(1,4)
-myHC.qCurrent = [0.2 0.2 0.2 0.2 0.2 0.2 0.2];
-temp = myHC.GetArmVerticies(myHC.qCurrent)
-
 %% Skeleton code
 %dh parameter
 %GUI
