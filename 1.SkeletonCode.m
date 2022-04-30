@@ -1,4 +1,12 @@
 %% Skeleton code
+myHC = HansCute();
+while myHC.running == true %%Can only run while this variable is true
+    
+end
+
+
+
+
 %dh parameter
 %GUI
 %create a robot class for hans_cute

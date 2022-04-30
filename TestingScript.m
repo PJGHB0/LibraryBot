@@ -17,3 +17,13 @@ EFTransform = myHC.model.fkine(myHC.model.getpos);
 temp = myHC.GetArmVerticies(myHC.model.getpos)
 display(EFTransform);
 
+%% Testing Estop
+myHC = HansCute();
+pause();
+myHC.EStop();
+pause();
+myHC.StartRobot();
+pause();
+myHC.EStop();
+pause();
+myHC.StartRobot();

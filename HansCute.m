@@ -7,6 +7,7 @@ classdef HansCute < handle %HansCuteRobot class
         workspace = [-0.6 0.6 -0.6 0.6 -0.6 1];
         scale = 0.5;
         stopVariable = [false false] %First part is whether the machine is stopped. Second is true for collision, false for estop
+        running = false
         baseLocation = transl(0,0,0);
         
         %DH Params
@@ -24,6 +25,7 @@ classdef HansCute < handle %HansCuteRobot class
             self.baseLocation = baseLocationIn;
             self.GetHCRobot();
             self.PlotAndColourRobot();
+            self.StartRobot();
         end
         function GetHCRobot (self) %Creates the robot model (self.model)
             pause(0.01); %Idk why we use this, but it was in UR5 code...
@@ -50,15 +52,47 @@ classdef HansCute < handle %HansCuteRobot class
             interception = false;
             %Need to implement function - find out if there is already
             %another function to do this.  
-            %We need to collision detect with both all obsticles, and the
-            %other robot (each link)
+            %We need to collision detect with all obsticles
             if  interception == true %What happens upon interception
                 self.stopVariable = [true true];
+                self.running = false; %activation of emergency turn OFF running procedure
             end
         end
-        function linearRMRC (self, A, B)
+        function LinearRMRC (self, A, B)
             %Move from transform A to transform B, in a straight line. Must
             %check for collisions along the way, and plot the transform
+            
+            %Get x, y, and z locations from both matricies
+            A_x = A(1,4);
+            A_y = A(2,4);
+            A_z = A(3,4);
+            B_x = B(1,4);
+            B_y = B(2,4);
+            B_z = B(3,4);
+        end
+        function EStop(self) % calling this activates and deactivates estop
+            if  self.stopVariable(1) == false %If we are not in an emergency stop mode
+                self.stopVariable = [true false];
+                self.running = false;
+                disp("E-Stop activated");
+            else %If stop is on, turn off
+                self.stopVariable(1) = false;  
+                disp("E-Stop de-activated");
+                %Note, we do NOT turn on running variable here. StartRobot
+                %must be called instead
+            end
+        end
+        function StartRobot(self)
+            if self.stopVariable(1) == false %%If we are not in an emergency stop mode
+                self.running = true;
+                disp("Robot now running");
+            else
+                if self.stopVariable(2) == false
+                    disp("Cannot activate robot: E-stop active");
+                else
+                    disp("Cannot activate robot: collision detected");
+                end
+            end
         end
         
     end
