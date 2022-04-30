@@ -7,6 +7,7 @@ classdef HansCute < handle %HansCuteRobot class
         workspace = [-0.6 0.6 -0.6 0.6 -0.6 1];
         scale = 0.5;
         stopVariable = [false false] %First part is whether the machine is stopped. Second is true for collision, false for estop
+        baseLocation = transl(0,0,0);
         
         %DH Params
         DH_d = [0.12 0 0.1408 0 0 0 0.1296];
@@ -16,7 +17,11 @@ classdef HansCute < handle %HansCuteRobot class
         DH_qlim = deg2rad([-150,150;-105,105;-150,150;-105,105;-105,105;-105,105;-150,150]);
     end
     methods
-        function self = HansCute() %Things to do on class creation
+        function self = HansCute(baseLocationIn) %Things to do on class creation
+            if nargin == 0
+                baseLocationIn = transl(0,0,0);
+            end
+            self.baseLocation = baseLocationIn;
             self.GetHCRobot();
             self.PlotAndColourRobot();
         end
@@ -29,7 +34,7 @@ classdef HansCute < handle %HansCuteRobot class
         end
         function PlotAndColourRobot (self) %Part of class initialisation
             %Currently does not Colour robot (need to implement)
-            self.model.base = transl(0,0,0);
+            self.model.base = self.baseLocation;
             self.model.plot(self.qCurrent,'workspace',self.workspace,'scale',self.scale); %Now the robot is plotted, and we do NOT have to plot it ever again (we simply animate it)
             view(45,25); %Set an appropriate view angle
         end

@@ -7,7 +7,7 @@ clf;
 clear;
 clc;
 
-myHC = HansCute();
+myHC = HansCute(transl(0.2,0.2,0.2));
 EFTransform = myHC.model.fkine(myHC.qCurrent); 
 temp = myHC.GetArmVerticies(myHC.qCurrent)
 display(EFTransform);
