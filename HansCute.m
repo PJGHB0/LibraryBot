@@ -41,23 +41,34 @@ classdef HansCute < handle %HansCuteRobot class
             view(45,25); %Set an appropriate view angle
         end
         function [transformMatrix] = GetArmVerticies(self,qInput) %Used for collision detection
-            transformMatrix = zeros(4,4,7);
             transformMatrix(:,:,1) = self.model.base();
             L = self.model.links;
             for i = 1:7
                 transformMatrix(:,:,i+1) = transformMatrix(:,:,i) * trotz(qInput(i) + self.DH_offset(i)) * transl(0,0,self.DH_d(i)) * transl(self.DH_a(i),0,0) * trotx(self.DH_alpha(i));
             end
         end
-        function CheckInterception (self)
-            interception = false;
-            %Need to implement function - find out if there is already
-            %another function to do this.  
-            %We need to collision detect with all obsticles
-            if  interception == true %What happens upon interception
-                self.stopVariable = [true true];
-                self.running = false; %activation of emergency turn OFF running procedure
+        function [collisionCheck] = CheckInterception (self,tr,vertex,faces,faceNormals)
+            %tr - transform matrix of all 8 robot links (4,4,8)
+            %[vertex,faces,faceNormals] - only for 1 obsticle - therfore
+            %function must be called as many times as there are obsticles,
+            %for each qMatrix
+            for i = 1 : size(tr,3)-1
+                for faceIndex = 1:size(faces,1)
+                    vertOnPlane = vertex(faces(faceIndex,1)',:);
+                    [intersectP,check] = LinePlaneIntersection(faceNormals(faceIndex,:),vertOnPlane,tr(1:3,4,i)',tr(1:3,4,i+1)'); 
+                    if check == 1 && IsIntersectionPointInsideTriangle(intersectP,vertex(faces(faceIndex,:)',:))
+                        collisionCheck = true;
+                        return
+                    end
+                end
             end
+                collisionCheck = false;
         end
+        
+%             if  interception == true %What happens upon interception
+%                 self.stopVariable = [true true];
+%                 self.running = false; %activation of emergency turn OFF running procedure
+%             end
         function LinearRMRC (self, A, B)
             %Move from transform A to transform B, in a straight line. Must
             %check for collisions along the way, and plot the transform

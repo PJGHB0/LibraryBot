@@ -10,12 +10,14 @@
 classdef RectangularPrism < handle
     properties
         vertex;
-        
+        face;
+        faceNormals;
     end
     methods
         function self = RectangularPrism()
         end
         function ConstructWithCorners(self,upper,lower)
+            %Set all verticies
             self.vertex(1,:) = lower;
             self.vertex(2,:) = [upper(1),lower(2:3)];
             self.vertex(3,:) = [upper(1:2),lower(3)];
@@ -24,9 +26,25 @@ classdef RectangularPrism < handle
             self.vertex(6,:) = [lower(1:2),upper(3)];
             self.vertex(7,:) = [lower(1),upper(2),lower(3)];
             self.vertex(8,:) = upper;
+            %Set faces
+            self.face= [1,2,3;1,3,7;
+                        1,6,5;1,7,5;
+                        1,6,4;1,4,2;
+                        6,4,8;6,5,8;
+                        2,4,8;2,3,8;
+                        3,7,5;3,8,5];
+            %Set faceNormals        
+            self.faceNormals = zeros(size(self.face,1),3);
+            for faceIndex = 1:size(self.face,1)
+                v1 = self.vertex(self.face(faceIndex,1)',:);
+                v2 = self.vertex(self.face(faceIndex,2)',:);
+                v3 = self.vertex(self.face(faceIndex,3)',:);
+                self.faceNormals(faceIndex,:) = unit(cross(v2-v1,v3-v1));
+            end
+            
         end
-        function GetVertexFaceNormals
         function ConstructWithCentre(self,centre,length_x,length_y,length_z)
+            %Set all verticies
             lower = [centre(1)+0.5*length_x centre(2)+0.5*length_y centre(3)+0.5*length_z];
             upper = [centre(1)-0.5*length_x centre(2)-0.5*length_y centre(3)-0.5*length_z];
             self.vertex(1,:) = lower;
@@ -37,6 +55,37 @@ classdef RectangularPrism < handle
             self.vertex(6,:) = [lower(1:2),upper(3)];
             self.vertex(7,:) = [lower(1),upper(2),lower(3)];
             self.vertex(8,:) = upper;
+            %Set faces
+            self.face =[1,2,3;1,3,7;
+                        1,6,5;1,7,5;
+                        1,6,4;1,4,2;
+                        6,4,8;6,5,8;
+                        2,4,8;2,3,8;
+                        3,7,5;3,8,5];
+            %Set faceNormals        
+            self.faceNormals = zeros(size(self.face,1),3);
+            for faceIndex = 1:size(self.face,1)
+                v1 = self.vertex(self.face(faceIndex,1)',:);
+                v2 = self.vertex(self.face(faceIndex,2)',:);
+                v3 = self.vertex(self.face(faceIndex,3)',:);
+                self.faceNormals(faceIndex,:) = unit(cross(v2-v1,v3-v1));
+            end
+        end
+        function [vertex,face,faceNormals] = GetVertexFaceNormals(self)
+            %We can individually find these properties, however this is
+            %easier if we want to pass to a function
+            vertex = self.vertex;
+            face = self.face;
+            faceNormals = self.faceNormals;
+        end
+        function PlotEdges(self)
+            hold on;
+            links=[1,2;2,3;3,7;7,1;1,6;5,6;5,7;4,8;5,8;6,4;4,2;8,3];
+            for i=1:size(links,1)
+                plot3(gca,[self.vertex(links(i,1),1),self.vertex(links(i,2),1)],...
+                [self.vertex(links(i,1),2),self.vertex(links(i,2),2)],...
+                [self.vertex(links(i,1),3),self.vertex(links(i,2),3)],'k')
+            end
         end
     end
         
