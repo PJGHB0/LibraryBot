@@ -66,3 +66,4 @@ collisionBool_Collision = myHC.CheckInterception(tCollision,v,f,fN)
 
 %% 
 myRobot = HansCute();
+myRobot.
