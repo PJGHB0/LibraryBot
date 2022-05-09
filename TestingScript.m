@@ -67,26 +67,23 @@ collisionBool_Collision = myHC.CheckInterception(tCollision,v,f,fN)
 clf;
 clear;
 clc;
+myHC = HansCute;
 myBrick = RectangularPrism();
-myBrick.ConstructWithCorners([1 1 1],[0 0 0]);
+myBrick.ConstructWithCorners([0.1 0.1 0.1],[0 0 0]);
 myBrick.PlotEdges();
 hold on;
-myBrick.PlotModel(transl(0,0,0),'Brick.ply');
-
+myBrick.PlotModel(transl(0.1,0.2,0)*trotz(pi/4),'Brick.ply');
 %% Function for animating robot and object along a qMatrix (must already be checked for interception)
 %Function requires qMatrix, and name of book file
 myHC = HansCute();
 bookName = 'Brick.ply'
 qMatrix = jtraj([0 0 0 0 0 0 0],[ 1.1 1.2 1.3 1.4 1.5 1.6 1.7],50); %An example, placeholder qMatrix
 qMatrixSize = size(qMatrix,1)
-PlaceObject(bookName,[0 0 0]);
+myBook = Book(myHC.model.fkine(qMatrix(1,:)),'Brick.ply');
 for i= 1:qMatrixSize
     myHC.model.animate(qMatrix(i,:));
     EFTransform = myHC.model.fkine(qMatrix(i,:));
-    % Issue is that we cannot set object orientation
-    PlaceObject(bookName,[EFTransform(1,4) EFTransform(2,4) EFTransform(3,4)]);
-    
-    % How to delete previous object?
+    myBook.Animate(EFTransform);
 end
 
 %% Collision detection for an entire qMatrix (and all objects)

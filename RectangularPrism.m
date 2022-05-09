@@ -15,7 +15,6 @@ classdef RectangularPrism < handle
         % A model for the object (is not to change location)
         model;
         base = transl(0,0,0); %Base is the set location of the model (not to change)
-        baseXYZ;
     end
     methods
         function self = RectangularPrism()
@@ -93,9 +92,18 @@ classdef RectangularPrism < handle
         end
         function PlotModel(self, baseLocationIn, fileName)
             self.base = baseLocationIn;
-            self.baseXYZ = [self.base(1,4) self.base(2,4) self.base(3,4)]
-            PlaceObject(fileName,self.baseXYZ);
-            % Dont know how to change / set orientation
+            [f,v,data] = plyread(fileName,'tri');
+            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+            vertexCount = size(v,1);
+            % Move center point to origin
+            midPoint = sum(v)/vertexCount;
+            verts = v - repmat(midPoint,vertexCount,1);
+            mesh_h = trisurf(f,verts(:,1),verts(:,2), verts(:,3) ...
+                            ,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+            updatedPoints = [self.base * [verts,ones(vertexCount,1)]']';  
+            % Now update the Vertices
+            mesh_h.Vertices = updatedPoints(:,1:3);
+            drawnow();  
         end
     end
         
