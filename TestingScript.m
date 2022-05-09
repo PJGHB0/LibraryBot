@@ -72,5 +72,72 @@ myBrick.ConstructWithCorners([1 1 1],[0 0 0]);
 myBrick.PlotEdges();
 hold on;
 myBrick.PlotModel(transl(0,0,0),'Brick.ply');
+
+%% Function for animating robot and object along a qMatrix (must already be checked for interception)
+%Function requires qMatrix, and name of book file
+myHC = HansCute();
+bookName = 'Brick.ply'
+qMatrix = jtraj([0 0 0 0 0 0 0],[ 1.1 1.2 1.3 1.4 1.5 1.6 1.7],50); %An example, placeholder qMatrix
+qMatrixSize = size(qMatrix,1)
+for i= 1:qMatrixSize
+    hold on;
+    myHC.model.animate(qMatrix(i,:));
+    EFTransform = myHC.model.fkine(qMatrix(i,:));
+    % Issue is that we cannot set object orientation
+    PlaceObject(bookName,[EFTransform(1,4) EFTransform(2,4) EFTransform(3,4)]);
+    % How to delete previous object?
+end
+
+%% Collision detection for an entire qMatrix (and all objects)
+clf;
+clear;
+clc;
+
+myHC = HansCute();
+collisionDetected = false; % Bool for is a check occurs
+CossisionDetectedIndex = 0; % Index for qMatrix row where collision occurs
+
+% Input parameters below
+qMatrix = jtraj([pi/2 pi/2 0 0 0 0 0],[ 0 pi/2 0 0 0 0 0],50); %An example, placeholder qMatrix
+qMatrixSize = size(qMatrix,1)
+
+% Make first obsticle
+myObsticle1 = RectangularPrism();
+myObsticle1.ConstructWithCorners([0.1 0.1 1],[-0.1 -0.1 0.3]);
+v1 = myObsticle1.vertex;
+f1 = myObsticle1.face;
+fN1 = myObsticle1.faceNormals;
+% Make second obsticle
+myObsticle2 = RectangularPrism();
+myObsticle2.ConstructWithCorners([0.1 0.1 1],[-0.1 -0.1 0.3]);
+v2 = myObsticle2.vertex;
+f2 = myObsticle2.face;
+fN2= myObsticle2.faceNormals;
+% Make third obsticle
+myObsticle3 = RectangularPrism();
+myObsticle3.ConstructWithCorners([0.1 0.1 1],[-0.1 -0.1 0.3]);
+v3 = myObsticle3.vertex;
+f3 = myObsticle3.face;
+fN3= myObsticle3.faceNormals;
+% Make fourth obsticle
+myObsticle4 = RectangularPrism();
+myObsticle4.ConstructWithCorners([0.1 0.1 1],[-0.1 -0.1 0.3]);
+v4 = myObsticle4.vertex;
+f4 = myObsticle4.face;
+fN4= myObsticle4.faceNormals;
+
+for i = 1:qMatrixSize
+    tr = myHC.GetArmVerticies(qMatrix(i,:));
+    ob1 = myHC.CheckInterception(tr,v1,f1,fN1);
+    ob2 = myHC.CheckInterception(tr,v2,f2,fN2);
+    ob3 = myHC.CheckInterception(tr,v3,f3,fN3);
+    ob4 = myHC.CheckInterception(tr,v4,f4,fN4);
+    if ob1 || ob2 || ob3 || ob4 %%If interception at ANY object
+        collisionDetected = true;
+        break
+    end
+    collisionDetected = false;
+end
+display(collisionDetected);
 %% 
 myRobot = HansCute();

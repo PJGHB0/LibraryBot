@@ -47,7 +47,7 @@ classdef HansCute < handle %HansCuteRobot class
                 transformMatrix(:,:,i+1) = transformMatrix(:,:,i) * trotz(qInput(i) + self.DH_offset(i)) * transl(0,0,self.DH_d(i)) * transl(self.DH_a(i),0,0) * trotx(self.DH_alpha(i));
             end
         end
-        function [collisionCheck] = CheckInterception (tr,vertex,faces,faceNormals)
+        function [collisionCheck] = CheckInterception (self,tr,vertex,faces,faceNormals)
             %tr - transform matrix of all 8 robot links (4,4,8)
             %[vertex,faces,faceNormals] - only for 1 obsticle - therfore
             %function must be called as many times as there are obsticles,
