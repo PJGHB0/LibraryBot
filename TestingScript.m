@@ -79,12 +79,13 @@ myHC = HansCute();
 bookName = 'Brick.ply'
 qMatrix = jtraj([0 0 0 0 0 0 0],[ 1.1 1.2 1.3 1.4 1.5 1.6 1.7],50); %An example, placeholder qMatrix
 qMatrixSize = size(qMatrix,1)
+PlaceObject(bookName,[0 0 0]);
 for i= 1:qMatrixSize
-    hold on;
     myHC.model.animate(qMatrix(i,:));
     EFTransform = myHC.model.fkine(qMatrix(i,:));
     % Issue is that we cannot set object orientation
     PlaceObject(bookName,[EFTransform(1,4) EFTransform(2,4) EFTransform(3,4)]);
+    
     % How to delete previous object?
 end
 

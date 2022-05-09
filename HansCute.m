@@ -39,6 +39,7 @@ classdef HansCute < handle %HansCuteRobot class
             self.model.base = self.baseLocation;
             self.model.plot(self.qCurrent,'workspace',self.workspace,'scale',self.scale); %Now the robot is plotted, and we do NOT have to plot it ever again (we simply animate it)
             view(45,25); %Set an appropriate view angle
+            hold on;
         end
         function [transformMatrix] = GetArmVerticies(self,qInput) %Used for collision detection
             transformMatrix(:,:,1) = self.model.base();
