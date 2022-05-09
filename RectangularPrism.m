@@ -12,6 +12,10 @@ classdef RectangularPrism < handle
         vertex;
         face;
         faceNormals;
+        % A model for the object (is not to change location)
+        model;
+        base = transl(0,0,0); %Base is the set location of the model (not to change)
+        baseXYZ;
     end
     methods
         function self = RectangularPrism()
@@ -78,7 +82,7 @@ classdef RectangularPrism < handle
             face = self.face;
             faceNormals = self.faceNormals;
         end
-        function PlotEdges(self)
+        function PlotEdges(self) % Plots the mesh of the object
             hold on;
             links=[1,2;2,3;3,7;7,1;1,6;5,6;5,7;4,8;5,8;6,4;4,2;8,3];
             for i=1:size(links,1)
@@ -86,6 +90,12 @@ classdef RectangularPrism < handle
                 [self.vertex(links(i,1),2),self.vertex(links(i,2),2)],...
                 [self.vertex(links(i,1),3),self.vertex(links(i,2),3)],'k')
             end
+        end
+        function PlotModel(self, baseLocationIn, fileName)
+            self.base = baseLocationIn;
+            self.baseXYZ = [self.base(1,4) self.base(2,4) self.base(3,4)]
+            PlaceObject(fileName,self.baseXYZ);
+            % Dont know how to change / set orientation
         end
     end
         

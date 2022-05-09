@@ -63,6 +63,14 @@ tCollision = myHC.GetArmVerticies(qCollision);
 collisionBool_NoCollision = myHC.CheckInterception(tNoCollision,v,f,fN)
 collisionBool_Collision = myHC.CheckInterception(tCollision,v,f,fN)
 
-
+%% And plotting an object
+clf;
+clear;
+clc;
+myBrick = RectangularPrism();
+myBrick.ConstructWithCorners([1 1 1],[0 0 0]);
+myBrick.PlotEdges();
+hold on;
+myBrick.PlotModel(transl(0,0,0),'Brick.ply');
 %% 
 myRobot = HansCute();

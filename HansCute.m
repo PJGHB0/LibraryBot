@@ -47,7 +47,7 @@ classdef HansCute < handle %HansCuteRobot class
                 transformMatrix(:,:,i+1) = transformMatrix(:,:,i) * trotz(qInput(i) + self.DH_offset(i)) * transl(0,0,self.DH_d(i)) * transl(self.DH_a(i),0,0) * trotx(self.DH_alpha(i));
             end
         end
-        function [collisionCheck] = CheckInterception (self,tr,vertex,faces,faceNormals)
+        function [collisionCheck] = CheckInterception (tr,vertex,faces,faceNormals)
             %tr - transform matrix of all 8 robot links (4,4,8)
             %[vertex,faces,faceNormals] - only for 1 obsticle - therfore
             %function must be called as many times as there are obsticles,
@@ -64,11 +64,6 @@ classdef HansCute < handle %HansCuteRobot class
             end
                 collisionCheck = false;
         end
-        
-%             if  interception == true %What happens upon interception
-%                 self.stopVariable = [true true];
-%                 self.running = false; %activation of emergency turn OFF running procedure
-%             end
         function LinearRMRC (self, A, B)
             %Move from transform A to transform B, in a straight line. Must
             %check for collisions along the way, and plot the transform
