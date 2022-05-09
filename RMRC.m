@@ -21,6 +21,7 @@ links=7;
 
 t = 5;             % Total time
 steps = 100;         % No. of steps
+steps2 = 30;
 % deltaT = t/steps;   % Discrete time step
 % delta = 2*pi/steps; % Small angle change
 % epsilon = 0.1;       % Threshold value for manipulability/Damped Least Squares
@@ -35,6 +36,9 @@ qM_X = zeros(steps,links);       % Array for joint angles
 qM_Y = zeros(steps,links);
 qM_Z = zeros(steps,links);
 
+qM_t1 = zeros(steps2,links);
+qM_t2 = zeros(steps2,links);
+
 qdot = zeros(steps,links);          % Array for joint velocities
 theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
@@ -46,13 +50,13 @@ z = zeros(3,steps);
  %% 1.3) Set up trajectory, initial pose
 %   A = [Ax Ay Az]   %starting cartesian
 %   B = [Bx By Bz]   %destination cartesian
-Ax=-0.15
+Ax=0.2
 Ay=-0.2
-Az=-0.1
+Az=0
 rpy_A = [3.1416   -0.0000   -1.5708]
 
-Bx=0.15
-By=0
+Bx=0.3
+By=-0.1
 Bz=0.3
 rpy_B = [-1.5881    0.7853    1.5830]
 
@@ -92,29 +96,43 @@ end
 
 for i=1:steps
 theta2(1,i) = 0;                 % Roll angle 
-theta2(2,i) = 0;            % Pitch angle
+theta2(2,i) = 0+i*1/steps*pi/2;            % Pitch angle
 theta2(3,i) = 0;                 % Yaw angle
 end
 
 
 rot_mtx=rpy2r(theta(:,1)');
+robot.teach();
 %%
+%matrix of q for movement along one axis
 qM_Z = myRMRC(robot,z,rot_mtx,theta,steps);
 qM_Y = myRMRC(robot,y,rot_mtx,theta,steps);
 qM_X = myRMRC(robot,x,rot_mtx,theta,steps);
 
+%matrix of q for transition between movements along different axis
+for i=1:steps2
+    qM_t1(i,:)= qM_Z(steps,:)+i*(qM_Y(1,:) -qM_Z(steps,:))/steps2 %from z to y
+    qM_t2(i,:)= qM_Y(steps,:)+i*(qM_X(1,:) -qM_Y(steps,:))/steps2 %form y to x
+end
 
  %% 1.5) Plot the results
 
-% figure(1)
+figure(1)
 % plot3(z(1,:),z(2,:),z(3,:),'k.','LineWidth',1)
 robot.plot(qM_Z,'trail','r-')
+
+robot.plot(qM_t1,'trail','r-')
 
 % plot3(y(1,:),y(2,:),y(3,:),'k.','LineWidth',1)
 robot.plot(qM_Y,'trail','r-')
 
+robot.plot(qM_t2,'trail','r-')
+
 % plot3(x(1,:),x(2,:),x(3,:),'k.','LineWidth',1)
 robot.plot(qM_X,'trail','r-')
+
+
+
 
 %% 
 
@@ -131,8 +149,9 @@ epsilon = 0.1;       % Threshold value for manipulability/Damped Least Squares
  qdot= zeros(steps,7);
 
 T = [rot_mtx [w(:,1)];zeros(1,3) 1];             % Create transformation of first point and angle
-
-qMatrix(1,:) = robot.ikcon(T);  % Solve joint angles to achieve first waypoint
+qCur = robot.getpos();
+qMatrix(1,:) = robot.ikcon(T,qCur);  % Solve joint angles to achieve first waypoint
+T2 = robot.fkine(qMatrix(1,:))
 
 for i = 1:steps-1
     T = robot.fkine(qMatrix(i,:))                 % Get forward transformation at current joint state
@@ -169,7 +188,7 @@ for i = 1:steps-1
 %         end
 %     end
     qMatrix(i+1,:) = qMatrix(i,:) + deltaT*qdot(i,:) % Update next joint state based on joint velocities
-%     m(i) = ...  % Record manipulability
+%      m(i) = ...  % Record manipulability
 %     positionError(:,i) = deltaX;  % For plotting
 %     angleError(:,i) = deltaTheta; % For plotting
 end
