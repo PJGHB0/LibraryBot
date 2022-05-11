@@ -174,5 +174,5 @@ Update_point_barrier_4 = [location_barrier_4*[v,ones(VertexCount_barrier_4,1)]']
  barrier_4.Vertices=Update_point_barrier_4(:,1:3);
 
  %Importing the Hanscute robot
- a= HansCute
+%  a= HansCute
 %  a.model.teach

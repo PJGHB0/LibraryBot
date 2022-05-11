@@ -4,7 +4,7 @@ classdef HansCute < handle %HansCuteRobot class
         model; %Robot model 
         gripperBool = false; %False for gripper open (not on)
         qCurrent = [0 0 0 0 0 0 0]; %ALWAYS plot using qCurrent. when plotting, change this value and sent it to the model. Note, that the current configuration is actually self.getpos
-        workspace = [-0.6 0.6 -0.6 0.6 -0.6 1];
+        workspace = [-1 1 -1 1 0 1];
         scale = 0.5;
         stopVariable = [false false] %First part is whether the machine is stopped. Second is true for collision, false for estop
         running = false
@@ -38,7 +38,7 @@ classdef HansCute < handle %HansCuteRobot class
             %Currently does not Colour robot (need to implement)
             self.model.base = self.baseLocation;
             self.model.plot(self.qCurrent,'workspace',self.workspace,'scale',self.scale); %Now the robot is plotted, and we do NOT have to plot it ever again (we simply animate it)
-            view(45,25); %Set an appropriate view angle
+            view(300,25); %Set an appropriate view angle
             hold on;
         end
         function [transformMatrix] = GetArmVerticies(self,qInput) %Used for collision detection

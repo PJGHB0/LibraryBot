@@ -76,10 +76,9 @@ myBrick.PlotModel(transl(0.1,0.2,0)*trotz(pi/4),'Brick.ply');
 %% Function for animating robot and object along a qMatrix (must already be checked for interception)
 %Function requires qMatrix, and name of book file
 myHC = HansCute();
-bookName = 'Brick.ply'
 qMatrix = jtraj([0 0 0 0 0 0 0],[ 1.1 1.2 1.3 1.4 1.5 1.6 1.7],50); %An example, placeholder qMatrix
 qMatrixSize = size(qMatrix,1)
-myBook = Book(myHC.model.fkine(qMatrix(1,:)),'Brick.ply');
+myBook = Book(myHC.model.fkine(qMatrix(1,:)),'book_1.ply');
 for i= 1:qMatrixSize
     myHC.model.animate(qMatrix(i,:));
     EFTransform = myHC.model.fkine(qMatrix(i,:));
