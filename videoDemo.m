@@ -5,7 +5,7 @@ clear;
 %% Here we initialise our environment and objects
 % Add in our robot model
 myHC = HansCute();
-axis off;
+% axis off;
 % Add in the wall and floor textures (no roof)
 surf([-1,-1;1,1],[-1,1;-1,1],[0.001,0.001;0.001,0.001],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
 surf([1,1;1,1],[1,-1;1,-1],[0,0;1,1],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
@@ -55,7 +55,10 @@ barrier_1.PlotModel(transl(-0.6,0,0.160)*trotz(-pi/2),'barrier.PLY');
 barrier_2.PlotModel(transl(0.6,0,0.160)*trotz(-pi/2),'barrier.PLY');
 barrier_3.PlotModel(transl(0,-0.9,0.160),'barrier.PLY');
 barrier_4.PlotModel(transl(0,0.9,0.160),'barrier.PLY');
-
+% Add in Estop button and camera
+button_1 = Book(transl(-0.8,1,0.5)*trotz(-pi/2),'button.ply');
+% button_2 = Book(transl(1,-0.8,0.5),'button.ply');
+camera = Book(transl(1,0,0.8)*trotz(-pi),'camera.PLY');
 %% Now we setup the animation parameters
 % We list the begining 'shelf poses' of the robot
 qInitial = [0 0 0 0 0 0 0];
