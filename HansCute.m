@@ -15,7 +15,7 @@ classdef HansCute < handle %HansCuteRobot class
         DH_a = [0 0 0 0.0718 0.0718 0 0];
         DH_alpha = [-pi/2 pi/2 pi/2 pi/2 -pi/2 pi/2 0];
         DH_offset = [-pi/2 0 0 pi/2 0 pi/2 0];
-        DH_qlim = deg2rad([-150,150;-105,105;-150,150;-105,105;-105,105;-105,105;-150,150]);
+        DH_qlim = deg2rad([-360,360;-135,135;-150,150;-150,150;-105,105;-105,105;-150,150]);
     end
     methods
         function self = HansCute(baseLocationIn) %Things to do on class creation

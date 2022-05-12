@@ -30,7 +30,7 @@ shelf_2.PlotModel(transl(0,-0.4,0.25)*trotz(pi),'bookshelf_2.PLY');
 shelf_3.PlotModel(transl(0.4,0,0.25)*trotz(-pi/2),'bookshelf_2.PLY');
 table_1.PlotModel(transl(-0.4,0,0.1)*trotz(-pi/2),'table.PLY');
 % Add in our books
-book_1 = Book(transl(-0.3327,0,0.2476)*trotz(-pi/2),'book_1.PLY');
+book_1 = Book(transl(-0.37,0,0.245)*trotz(-pi/2),'book_1.PLY');
 book_2 = Book(transl(0.4,0,0.40167)*trotz(-pi/2),'book_2.PLY');
 book_3 = Book(transl(0,0.4,0.24833),'book_2.PLY');
 book_4 = Book(transl(0,-0.4,0.04),'book_2.PLY');
@@ -66,7 +66,7 @@ qShelf_3_q1 = deg2rad([90 0 0 0 0 0 0]);
 % shelf by changing q1 by 90 degrees)
 qShelf_Upper = deg2rad([0 30 0 0 0 -60 0]); % Difficult to reach, near singularity
 qShelf_Mid = deg2rad([0 -30 0 -90 0 -30 0]);
-qShelf_Lower = deg2rad([0 15 0 -140 0 65 0]);
+qShelf_Lower = deg2rad([0 55 0 -90 0 55 0]);
 % We can choose which shelf (or table), and which level, by summing the q
 % matricies
 
@@ -83,16 +83,10 @@ for i = 1:size(qMatrix,1)
     myHC.model.animate(qMatrix(i,:));
 end
 % Move book to bottom of shelf 1
-qMatrix = jtraj(qGetBook1, qTable_0_q1 + qShelf_Mid, 30);
+qMatrix = jtraj(qGetBook1, qShelf_1_q1 + qShelf_Lower, 65)
 for i = 1:size(qMatrix,1)
     myHC.model.animate(qMatrix(i,:));
     EFTransform = myHC.model.fkine(qMatrix(i,:));
-    book_1.Animate(EFTransform*transl(0 0 0.1)*trotx(pi/2)*troty(pi/2));
-end
-qMatrix = jtraj(qTable_0_q1 + qShelf_Mid, - qShelf_1_q1 + qShelf_Lower, 50);
-for i = 1:size(qMatrix,1)
-    myHC.model.animate(qMatrix(i,:));
-    EFTransform = myHC.model.fkine(qMatrix(i,:));
-    book_1.Animate(EFTransform*trotx(pi/2)*troty(pi/2));
+    book_1 Book.Animate(EFTransform);
 end
 
