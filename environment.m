@@ -2,10 +2,10 @@
 axis([-1 1 -1 1 0 0.6]);
 
 % Setting the floor and wall
-surf([-1,-1;1,1],[-1,1;-1,1],[0,0;0,0],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
+surf([-1,-1;1,1],[-1,1;-1,1],[0,0;0,0],'CData',imread('wood.jpg'),'FaceColor','texturemap');
 hold on
-surf([1,1;1,1],[1,-1;1,-1],[0,0;1,1],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
-surf([1,-1;1,-1],[1,1;1,1],[0,0;1,1],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
+surf([1,1;1,1],[1,-1;1,-1],[0,0;1,1],'CData',imread('wood.jpg'),'FaceColor','texturemap');
+surf([1,-1;1,-1],[1,1;1,1],[0,0;1,1],'CData',imread('wood.jpg'),'FaceColor','texturemap');
 
 %Setting up the first bookshelf
 [f,v,data] = plyread('bookshelf_2.PLY','tri');
@@ -172,7 +172,31 @@ Update_point_barrier_4 = [location_barrier_4*[v,ones(VertexCount_barrier_4,1)]']
  barrier_4 = trisurf(f,v(:,1),v(:,2), v(:,3) ...
                 ,'FaceVertexCData',vertexColours,'EdgeColor','none','EdgeLighting','none');
  barrier_4.Vertices=Update_point_barrier_4(:,1:3);
+ [f,v,data] = plyread('camera.PLY','tri');
+ VertexCount_camera = size(v,1);  %Find the number of vertex
+%  MidPoint = sum(v)/VertexCount;
+ 
+ vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+
+location_camera= transl(-1,0,0.8); %Setting the location of the third bookshelf, change this to change the location and orientation
+Update_point_camera = [location_camera*[v,ones(VertexCount_camera,1)]']'
+ camera = trisurf(f,v(:,1),v(:,2), v(:,3) ...
+                ,'FaceVertexCData',vertexColours,'EdgeColor','none','EdgeLighting','none');
+ camera.Vertices=Update_point_camera(:,1:3);
+
+  [f,v,data] = plyread('button.PLY','tri');
+ VertexCount_button = size(v,1);  %Find the number of vertex
+%  MidPoint = sum(v)/VertexCount;
+ 
+ vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+
+location_button= transl(-0.8,1,0.5)*trotz(-pi/2); %Setting the location of the third bookshelf, change this to change the location and orientation
+Update_point_button = [location_button*[v,ones(VertexCount_button,1)]']'
+ button = trisurf(f,v(:,1),v(:,2), v(:,3) ...
+                ,'FaceVertexCData',vertexColours,'EdgeColor','none','EdgeLighting','none');
+ button.Vertices=Update_point_button(:,1:3);
+
 
  %Importing the Hanscute robot
-%  a= HansCute
+ a= HansCute
 %  a.model.teach
