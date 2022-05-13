@@ -5,7 +5,7 @@ clear;
 %% Here we initialise our environment and objects
 % Add in our robot model
 myHC = HansCute();
-% axis off;
+axis off;
 % Add in the wall and floor textures (no roof)
 surf([-1,-1;1,1],[-1,1;-1,1],[0.001,0.001;0.001,0.001],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
 surf([1,1;1,1],[1,-1;1,-1],[0,0;1,1],'CData',imread('concrete.jpg'),'FaceColor','texturemap');
