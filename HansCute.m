@@ -65,17 +65,65 @@ classdef HansCute < handle %HansCuteRobot class
             end
                 collisionCheck = false;
         end
-        function LinearRMRC (self, A, B)
-            %Move from transform A to transform B, in a straight line. Must
-            %check for collisions along the way, and plot the transform
+        function [qMatrix] = LinearRMRC (self, qInitial, B)
+            % Move from qInitial to transform B, in a straight line.
+            % Returns a qMatrix
             
-            %Get x, y, and z locations from both matricies
-            A_x = A(1,4);
-            A_y = A(2,4);
-            A_z = A(3,4);
-            B_x = B(1,4);
-            B_y = B(2,4);
-            B_z = B(3,4);
+            % We determine an arm velocity. Then, depending on the distance
+            % to the desired location, we determine a total time, and
+            % number of steps. 
+            speed = 0.05; % In m/s, change as necessary
+            stepsPerSecond = 20; % Arbitrary - play around with this and see how it changes
+            epsilon = 0.1;      % Also arbitrary
+            W = diag([1 1 1 0.1 0.1 0.1]);          % Weighting vector places more emphasis on the linear motion, than the rotational
+            
+            A = self.model.fkine(qInitial);
+            changeInPose = B - A;
+            distanceTotal = (changeInPose(1,4)^2 + changeInPose(2,4)^2 + changeInPose(3,4)^2)^0.5;
+            timeTotal = distanceTotal / speed
+            stepsTotal = stepsPerSecond*timeTotal  % Arbitrarily set 20 steps per second
+            deltaT = timeTotal/stepsTotal;          % Time for each step
+            deltaAngle = 2*pi/stepsTotal;           % Discrete angle change
+            
+            % Now we setup the arrays
+            % Since we are moving the book straight into the shelf, we do
+            % not worry about angle RMRC control
+            manipulability = zeros(fix(stepsTotal),1);   % Measure of manipulability at each step     fix() cuts off the decimals, making the number an integer
+            qMatrix = zeros(fix(stepsTotal),7);          % qMatrix for arm motion
+            qDotMatrix = zeros(fix(stepsTotal),7);       % derivitive of above matrix
+%             thetaMatrix = zeros(3,stepsTotal);      % roll-pitch-yaw matrix
+            xyzMatrix = zeros(3,fix(stepsTotal));        % x-y-z motion Matrix
+            positionError = zeros(3,fix(stepsTotal));    % Linear Error due to singularity avoision
+%             angleError = zeros(3,stepsTotal);       % Angle Error due to singularity avoision
+            % Here we setup the cartesian trajectory
+            trapezoidalScalar = lspb(0,1,stepsTotal);
+            for i=1:stepsTotal
+                xyzMatrix(1,i) = (1-trapezoidalScalar(i))*A(1,4) + trapezoidalScalar(i)*B(1,4);
+                xyzMatrix(2,i) = (1-trapezoidalScalar(i))*A(2,4) + trapezoidalScalar(i)*B(2,4);
+                xyzMatrix(3,i) = (1-trapezoidalScalar(i))*A(3,4) + trapezoidalScalar(i)*B(3,4);
+            end
+            % Here we track the trajectory with RMRC.
+            T = A;                                          % Initial EF transform
+            qMatrix(1,:) = qInitial;                        % Set initial q values as row 1 of qMatrix
+            for i=1:stepsTotal-1
+                T = self.model.fkine(qMatrix(i,:));         % Get current EF transform
+                deltaX = xyzMatrix(:,i+1) - T(1:3,4);       % Difference between NEXT desired cartesian point, and our current EF transform (3x1 array)
+                J = self.model.jacob0(qMatrix(i,:));        % Get current Jacobian
+                manipulability(i) = sqrt(det(J*J'));        % Get maanipulability
+                linearVelocity = deltaX/deltaT;             % Get linear velocity to next point
+                angularVelocity = 0*linearVelocity;         % Placeholder for the angular velocity (we do not perform RMRC on angle
+                xDot = W*[linearVelocity;angularVelocity];            % We do not worry about the angle change
+                if manipulability(i) < epsilon  % If manipulability is less than given threshold
+                    lambda = (1 - manipulability(i)/epsilon)*0.001;
+                else
+                    lambda = 0;
+                end
+                invJ = inv(J'*J + lambda*eye(7))*J';        % DLS inverse
+                qDotMatrix(i,:) = invJ * xDot;
+                % We do not check if joint limits are maintained
+                qMatrix(i+1,:) = qMatrix(i,:) + deltaT*qDotMatrix(i,:);
+                positionError(:,i) = xyzMatrix(:,i+1) - T(1:3,4);
+            end
         end
         function EStop(self) % calling this activates and deactivates estop
             if  self.stopVariable(1) == false %If we are not in an emergency stop mode

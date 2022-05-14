@@ -136,5 +136,15 @@ for i = 1:qMatrixSize
     collisionDetected = false;
 end
 display(collisionDetected);
-%% 
-myRobot = HansCute();
+%% Testing RMRC
+clf;
+clc;
+clear;
+myHC = HansCute();
+qInitial = deg2rad([180 -30 0 -90 0 -30 0]);
+cartesianInitial = myHC.model.fkine(qInitial);
+cartesianFinal = cartesianInitial + transl(0.1,0,0);
+qMatrix = myHC.LinearRMRC(qInitial,cartesianFinal);
+for i= 1:size(qMatrix,1)
+    myHC.model.animate(qMatrix(i,:));
+end

@@ -1,6 +1,6 @@
 function RMRC()
 close all;
-clear all;
+clear;
 clc;
 
 %% 1.1) Set parameters for the simulation
