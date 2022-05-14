@@ -80,8 +80,8 @@ classdef HansCute < handle %HansCuteRobot class
             A = self.model.fkine(qInitial);
             changeInPose = B - A;
             distanceTotal = (changeInPose(1,4)^2 + changeInPose(2,4)^2 + changeInPose(3,4)^2)^0.5;
-            timeTotal = distanceTotal / speed
-            stepsTotal = stepsPerSecond*timeTotal  % Arbitrarily set 20 steps per second
+            timeTotal = distanceTotal / speed;
+            stepsTotal = stepsPerSecond*timeTotal;  % Arbitrarily set 20 steps per second
             deltaT = timeTotal/stepsTotal;          % Time for each step
             deltaAngle = 2*pi/stepsTotal;           % Discrete angle change
             

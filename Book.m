@@ -13,9 +13,11 @@ classdef Book < handle
     verts;
     mesh_h;
     updatedPoints;
+    onShelf; % Binary for on shelf or not
     end
     methods
-        function self = Book(startingTransform, fileName)
+        function self = Book(startingTransform, fileName,onShelf)
+            self.onShelf = onShelf;
             self.currentTransform = startingTransform;
             self.fileName = fileName;
             [self.f,self.v,self.data] = plyread(fileName,'tri');
