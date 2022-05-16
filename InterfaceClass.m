@@ -43,7 +43,7 @@ classdef InterfaceClass < handle
             self.xyzBookShelfDepositLocation{1} = transl(0,0.06,-0.01);
             self.xyzBookShelfDepositLocation{2} = transl(0,0.08,0);
             self.xyzBookShelfDepositLocation{3} = transl(0,0.08,-0.01);
-            self.speedMultiplier = 1;
+            self.speedMultiplier = 1.5;
             self.HansCute.speed = 0.1*self.speedMultiplier;
         end
         function BuildEnvironment(self)
@@ -244,6 +244,19 @@ classdef InterfaceClass < handle
         end
         function EStop(self)
             self.HansCute.EStop();
+        end
+        function ReturnToInitialPosition(self)
+            qMatrix = jtraj(self.HansCute.qCurrent,[0 0 0 0 0 0 0],50/self.speedMultiplier);
+            MoveWithoutBook(self,qMatrix);
+        end
+        function DirectQControl(self,jointNumber,direction)
+            % Joint number is 1 to 7. Direction is 1 for forward, -1 for
+            % backwards.
+            qDesired = [0 0 0 0 0 0 0];
+            qDesired(jointNumber) = direction*0.087;
+            qDesired = qDesired + self.HansCute.qCurrent;
+            qMatrix = jtraj(self.HansCute.qCurrent,qDesired,5);
+            MoveWithoutBook(self,qMatrix);
         end
     end
 end
