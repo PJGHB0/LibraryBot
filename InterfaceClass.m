@@ -42,7 +42,7 @@ classdef InterfaceClass < handle
             self.xyzBookShelfDepositLocation{1} = transl(0,0.06,-0.01);
             self.xyzBookShelfDepositLocation{2} = transl(0,0.08,0);
             self.xyzBookShelfDepositLocation{3} = transl(0,0.08,-0.01);
-            self.speedMultiplier = 4;
+            self.speedMultiplier = 2;
             self.HansCute.speed = 0.1*self.speedMultiplier;
         end
         function BuildEnvironment(self)
@@ -86,6 +86,7 @@ classdef InterfaceClass < handle
             self.camera_1 = Book(transl(1,0,0.8)*trotz(-pi),'camera.PLY',false);
         end
         function EmergencyProcedure(self,emergencyType)
+            %Upon a collision or estop being pressed, this is excecuted
             %Emergency type - 0 for EStop, 1 for collision
             if emergencyType == 1
             % Collision procedure    
@@ -134,7 +135,7 @@ classdef InterfaceClass < handle
         function GetBook(self,bookNumber)
             % We check if book is already retreived
             if ~self.books{bookNumber}.onShelf
-                X = ['ERROR: Book ',num2str(bookNumber),' is already on the table']
+                X = ['ERROR: Book ',num2str(bookNumber),' is already on the table'];
                 disp(X);
                 return
             end
@@ -160,6 +161,8 @@ classdef InterfaceClass < handle
             self.HansCute.TriggerGripper(false);
             MoveWithoutBook(self,flip(qMatrix,1));
             self.books{bookNumber}.onShelf = false;
+            X = ['----------Book ',num2str(bookNumber),' Retreived----------'];
+            disp(X);
         end
         function MoveWithBook(self,qMatrix,bookNumber)
             % Does not work if we are currently stopped
@@ -171,18 +174,16 @@ classdef InterfaceClass < handle
             % robot q)m while holding the specified book. 
             % Checks for collision along the way
             for i = 1:size(qMatrix,1)
+                armVerticies = self.HansCute.GetArmVerticies(qMatrix(i,:));
+                collisionFlag = self.HansCute.CheckInterception(armVerticies,self.shelf_1.vertex,self.shelf_1.face,self.shelf_1.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_2.vertex,self.shelf_2.face,self.shelf_2.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_3.vertex,self.shelf_3.face,self.shelf_3.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.table_0.vertex,self.table_0.face,self.table_0.faceNormals);
+                if collisionFlag
+                    self.HansCute.CollisionStop();
+                    break
+                end
                 self.HansCute.model.animate(qMatrix(i,:));
                 self.HansCute.qCurrent = qMatrix(i,:);
                 EFTransform = self.HansCute.model.fkine(qMatrix(i,:));
                 self.books{bookNumber}.Animate(EFTransform*transl(0,0,0.03)*trotx(pi/2)*troty(pi/2));
-                armVerticies = self.HansCute.GetArmVerticies(qMatrix(i,:));
-                collisionFlag = self.HansCute.CheckInterception(armVerticies,self.shelf_1.vertex,self.shelf_1.face,self.shelf_1.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_2.vertex,self.shelf_2.face,self.shelf_2.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_3.vertex,self.shelf_3.face,self.shelf_3.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.table_0.vertex,self.table_0.face,self.table_0.faceNormals);
-                if collisionFlag
-                    disp("Collision detected!");
-                    self.HansCute.EStop();
-                    self.HansCute.stopVariable = [true true];
-                    break
-                end
             end
 
         end
@@ -196,8 +197,6 @@ classdef InterfaceClass < handle
             % robot q)
             % Checks for collision along the way
             for i = 1:size(qMatrix,1)
-                self.HansCute.model.animate(qMatrix(i,:));
-                self.HansCute.qCurrent = qMatrix(i,:);
                 armVerticies = self.HansCute.GetArmVerticies(qMatrix(i,:));
                 collisionFlag = self.HansCute.CheckInterception(armVerticies,self.shelf_1.vertex,self.shelf_1.face,self.shelf_1.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_2.vertex,self.shelf_2.face,self.shelf_2.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_3.vertex,self.shelf_3.face,self.shelf_3.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.table_0.vertex,self.table_0.face,self.table_0.faceNormals);
                 if collisionFlag
@@ -206,6 +205,8 @@ classdef InterfaceClass < handle
                     self.HansCute.stopVariable = [true true];
                     break
                 end
+                self.HansCute.model.animate(qMatrix(i,:));
+                self.HansCute.qCurrent = qMatrix(i,:);
             end
         end
         function [collisionPredicted,index] = CollisionPrediction(self,qMatrix)

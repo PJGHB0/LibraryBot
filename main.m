@@ -5,12 +5,8 @@ clear
 myInterface = InterfaceClass();
 
 %% Testing book get and return
-myInterface.ReturnBook(3);
 myInterface.ReturnBook(1);
-myInterface.GetBook(3);
 myInterface.ReturnBook(2);
-myInterface.GetBook(1);
-myInterface.GetBook(2);
 myInterface.GetBook(1);
 %% Testing control (obselete)
 % qMatrix = jtraj([0 0 0 0 0 0 0],myInterface.qtable_0_q1+myInterface.qShelf_Mid,50);

@@ -136,6 +136,11 @@ classdef HansCute < handle %HansCuteRobot class
                 %must be called instead
             end
         end
+        function CollisionStop(self)
+            disp("Collision detected!");
+            self.running = false;
+            self.stopVariable(2) = true;
+        end
         function StartRobot(self)
             if self.stopVariable(1) == false %%If we are not in an emergency stop mode
                 self.running = true;
