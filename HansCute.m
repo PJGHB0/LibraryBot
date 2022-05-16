@@ -9,7 +9,7 @@ classdef HansCute < handle %HansCuteRobot class
         stopVariable = [false false] %First part is whether the machine is stopped. Second is true for collision, false for estop
         running = false
         baseLocation = transl(0,0,0);
-        
+        speed = 0.1; % Speed for RMRC
         %DH Params
         DH_d = [0.12 0 0.1408 0 0 0 0.1296];
         DH_a = [0 0 0 0.0718 0.0718 0 0];
@@ -72,7 +72,6 @@ classdef HansCute < handle %HansCuteRobot class
             % We determine an arm velocity. Then, depending on the distance
             % to the desired location, we determine a total time, and
             % number of steps. 
-            speed = 0.05; % In m/s, change as necessary
             stepsPerSecond = 20; % Arbitrary - play around with this and see how it changes
             epsilon = 0.1;      % Also arbitrary
             W = diag([1 1 1 0.1 0.1 0.1]);          % Weighting vector places more emphasis on the linear motion, than the rotational
@@ -80,7 +79,7 @@ classdef HansCute < handle %HansCuteRobot class
             A = self.model.fkine(qInitial);
             changeInPose = B - A;
             distanceTotal = (changeInPose(1,4)^2 + changeInPose(2,4)^2 + changeInPose(3,4)^2)^0.5;
-            timeTotal = distanceTotal / speed;
+            timeTotal = distanceTotal / self.speed;
             stepsTotal = stepsPerSecond*timeTotal;  % Arbitrarily set 20 steps per second
             deltaT = timeTotal/stepsTotal;          % Time for each step
             deltaAngle = 2*pi/stepsTotal;           % Discrete angle change
@@ -137,6 +136,11 @@ classdef HansCute < handle %HansCuteRobot class
                 %must be called instead
             end
         end
+        function CollisionStop(self)
+            disp("Collision detected!");
+            self.running = false;
+            self.stopVariable(2) = true;
+        end
         function StartRobot(self)
             if self.stopVariable(1) == false %%If we are not in an emergency stop mode
                 self.running = true;
@@ -147,6 +151,15 @@ classdef HansCute < handle %HansCuteRobot class
                 else
                     disp("Cannot activate robot: collision detected");
                 end
+            end
+        end
+        function TriggerGripper(self,inputBool)
+            if  inputBool %If gripper is open
+                self.gripperBool = true;
+                disp("Gripper closed");
+            else
+                self.gripperBool = false;
+                disp("Gripper released");
             end
         end
         
