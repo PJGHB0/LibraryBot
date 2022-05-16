@@ -14,6 +14,7 @@ classdef InterfaceClass < handle
         barrier_4;
         button_1;
         camera_1;
+        currentBookInHand
         % We list the shelf poses of the robot
         % We can choose which shelf (or table), and which level, by summing the q
         % matricies below
@@ -42,7 +43,7 @@ classdef InterfaceClass < handle
             self.xyzBookShelfDepositLocation{1} = transl(0,0.06,-0.01);
             self.xyzBookShelfDepositLocation{2} = transl(0,0.08,0);
             self.xyzBookShelfDepositLocation{3} = transl(0,0.08,-0.01);
-            self.speedMultiplier = 2;
+            self.speedMultiplier = 1;
             self.HansCute.speed = 0.1*self.speedMultiplier;
         end
         function BuildEnvironment(self)
@@ -113,6 +114,7 @@ classdef InterfaceClass < handle
             MoveWithoutBook(self,qMatrix);
             % Now we go backwards away from the book (while holding book)
             self.HansCute.TriggerGripper(true);
+            self.currentBookInHand = bookNumber;
             MoveWithBook(self,flip(qMatrix,1),bookNumber);
             % Now we go to in front of the appropriate shelf location
             qMatrix = jtraj(self.HansCute.qCurrent, self.qBooksShelfPosition{bookNumber}, 50/self.speedMultiplier);
@@ -143,6 +145,7 @@ classdef InterfaceClass < handle
             disp(X);
             % First we go to the book location
             self.HansCute.gripperBool = false;
+            self.currentBookInHand = bookNumber;
             qMatrix = jtraj(self.HansCute.qCurrent,self.qBooksShelfPosition{bookNumber},50/self.speedMultiplier);
             MoveWithoutBook(self,qMatrix);
             % Now we retreive the book
@@ -200,9 +203,7 @@ classdef InterfaceClass < handle
                 armVerticies = self.HansCute.GetArmVerticies(qMatrix(i,:));
                 collisionFlag = self.HansCute.CheckInterception(armVerticies,self.shelf_1.vertex,self.shelf_1.face,self.shelf_1.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_2.vertex,self.shelf_2.face,self.shelf_2.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.shelf_3.vertex,self.shelf_3.face,self.shelf_3.faceNormals) || self.HansCute.CheckInterception(armVerticies,self.table_0.vertex,self.table_0.face,self.table_0.faceNormals);
                 if collisionFlag
-                    disp("Collision detected!");
-                    self.HansCute.EStop();
-                    self.HansCute.stopVariable = [true true];
+                    self.HansCute.CollisionStop();
                     break
                 end
                 self.HansCute.model.animate(qMatrix(i,:));
@@ -221,6 +222,28 @@ classdef InterfaceClass < handle
                     return
                 end
             end
+        end
+        function RMRC(self,direction)
+            % Direction input - will comprise of x,y,and z proportions (is
+            % scaled down internally to a unit vector)
+            % direction(1,2,3) is x,y,z respectively
+            directionMagnitude = ((direction(1))^2+(direction(2))^2+(direction(3))^2)^0.5;
+            unitVector = direction / directionMagnitude;
+            unitTransform = transl(0.02*unitVector);
+            EFCurrent = self.HansCute.model.fkine(self.HansCute.qCurrent);
+            EFDesired = EFCurrent * unitTransform;
+            qMatrix = self.HansCute.LinearRMRC(self.HansCute.qCurrent,EFDesired);
+            % Note, GUI RMRC does NOT move the book (so cannot be used when
+            % book 
+            if self.HansCute.gripperBool == false
+                % If we are NOT holding a book
+                MoveWithoutBook(self,qMatrix);
+            else
+                MoveWithBook(self,qMatrix,self.currentBookInHand);
+            end
+        end
+        function EStop(self)
+            self.HansCute.EStop();
         end
     end
 end
