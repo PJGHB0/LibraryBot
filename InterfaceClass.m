@@ -25,10 +25,11 @@ classdef InterfaceClass < handle
         qShelf_Upper = deg2rad([0 30 0 0 0 -60 0]);     % Difficult to reach, near singularity
         qShelf_Mid = deg2rad([0 -40 0 -120 0 -10 0]);
         qTable_level = deg2rad([0 -30 0 -90 0 -30 0]);
-        qShelf_Lower = deg2rad([0 35 0 -140 0 85 0]);
+        qShelf_Lower = deg2rad([0 25 0 -150 0 85 0]);
         % all the following are in terms of end effector pose (have to
         % translate along z to get book pose)
         qBooksShelfPosition; % This is th position IN FRONT OF the books shelf location (not the final drop off point)
+        xyzBookShelfDepositLocation; % This is the position of the book when it is to be released
         speedMultiplier;
     end
     methods
@@ -38,7 +39,10 @@ classdef InterfaceClass < handle
             self.qBooksShelfPosition{1} = self.qshelf_1_q1 + self.qShelf_Lower; % Book one has home on lower shelf 1
             self.qBooksShelfPosition{2} = self.qshelf_2_q1 + self.qShelf_Mid;
             self.qBooksShelfPosition{3} = self.qshelf_3_q1 + self.qShelf_Mid;
-            self.speedMultiplier = 5;
+            self.xyzBookShelfDepositLocation{1} = transl(0,0.06,-0.01);
+            self.xyzBookShelfDepositLocation{2} = transl(0,0.08,0);
+            self.xyzBookShelfDepositLocation{3} = transl(0,0.08,-0.01);
+            self.speedMultiplier = 4;
             self.HansCute.speed = 0.1*self.speedMultiplier;
         end
         function BuildEnvironment(self)
@@ -64,9 +68,9 @@ classdef InterfaceClass < handle
             self.shelf_3.PlotEdges();
             self.table_0.PlotEdges();
             % Add in our books
-            self.books{1} = Book(transl(-0.3627,-0.05,0.2476)*trotz(pi/2),'book_2.PLY',false);
+            self.books{1} = Book(transl(-0.3627,-0.07,0.2476)*trotz(pi/2),'book_2.PLY',false);
             self.books{2} = Book(transl(-0.3627,0,0.2476)*trotz(pi/2),'book_1.PLY',false);
-            self.books{3} = Book(transl(-0.3627,0.05,0.2476)*trotz(pi/2),'book_2.PLY',false);
+            self.books{3} = Book(transl(-0.3627,0.07,0.2476)*trotz(pi/2),'book_2.PLY',false);
             % Add in our barrier (as a rectangular prism)
             self.barrier_1 = RectangularPrism();
             self.barrier_2 = RectangularPrism();
@@ -93,39 +97,69 @@ classdef InterfaceClass < handle
         function ReturnBook(self,bookNumber)
             % We check if book is already returned
             if self.books{bookNumber}.onShelf
-                disp("Book already on shelf");
+                X = ['ERROR: Book ',num2str(bookNumber),' is already on the shelf'];
+                disp(X);
                 return
             end
+            X = ['----------Returning Book ',num2str(bookNumber),'----------'];
+            disp(X);
             % First go in front of book on table (and make sure EF is open)
-            self.HansCute.gripperBool = false;
+            self.HansCute.TriggerGripper(false);
             qMatrix = jtraj(self.HansCute.qCurrent,self.qtable_0_q1+self.qTable_level,50/self.speedMultiplier);
             MoveWithoutBook(self,qMatrix);
             % Next we slowly move the arm to the book location
             qMatrix = self.HansCute.LinearRMRC(self.HansCute.qCurrent,self.books{bookNumber}.currentTransform*transl(0,-0.03,0));
             MoveWithoutBook(self,qMatrix);
             % Now we go backwards away from the book (while holding book)
-            self.HansCute.gripperBool = true;
+            self.HansCute.TriggerGripper(true);
             MoveWithBook(self,flip(qMatrix,1),bookNumber);
             % Now we go to in front of the appropriate shelf location
             qMatrix = jtraj(self.HansCute.qCurrent, self.qBooksShelfPosition{bookNumber}, 50/self.speedMultiplier);
             MoveWithBook(self,qMatrix,bookNumber);
             % Now we use RMRC to place the book (opportunity for visual
             % servoing)
-            qMatrix = self.HansCute.LinearRMRC(self,self.HansCute.qCurrent,self.books{bookNumber}.currentTransform*transl(0,0.07-0.03,0));
+            qMatrix = self.HansCute.LinearRMRC(self.HansCute.qCurrent,self.books{bookNumber}.currentTransform*self.xyzBookShelfDepositLocation{bookNumber});
             MoveWithBook(self,qMatrix,bookNumber);
             % Back out from the book location (after releasing book)
-            self.HansCute.gripperBool = false;
-            MoveWithBook(Self,flip(qMatrix,1),bookNumber);
-            % And return to upright position
-            MoveWithoutBook(self,[0 0 0 0 0 0 0]);
+            self.HansCute.TriggerGripper(false);
+            MoveWithoutBook(self,flip(qMatrix,1));
+%             And return to upright position (WE SKIP THIS RIGHT NOW, AS
+%             ITS UNNECESSARY)
+%             qMatrix = jtraj(self.HansCute.qCurrent, [0 0 0 0 0 0 0], 75/self.speedMultiplier);
+%             MoveWithoutBook(self,qMatrix);
+            self.books{bookNumber}.onShelf = true;
+            X = ['----------Book ',num2str(bookNumber),' Returned----------'];
+            disp(X);
         end
         function GetBook(self,bookNumber)
             % We check if book is already retreived
-            if ~self.books.onShelf
-                disp("Book already retreived");
+            if ~self.books{bookNumber}.onShelf
+                X = ['ERROR: Book ',num2str(bookNumber),' is already on the table']
+                disp(X);
                 return
             end
-            
+            X = ['----------Getting Book ',num2str(bookNumber),'----------'];
+            disp(X);
+            % First we go to the book location
+            self.HansCute.gripperBool = false;
+            qMatrix = jtraj(self.HansCute.qCurrent,self.qBooksShelfPosition{bookNumber},50/self.speedMultiplier);
+            MoveWithoutBook(self,qMatrix);
+            % Now we retreive the book
+            qMatrix = self.HansCute.LinearRMRC(self.HansCute.qCurrent,self.HansCute.model.fkine(self.HansCute.qCurrent)*transl(0,0,0.03)*trotx(pi/2)*troty(pi/2)*self.xyzBookShelfDepositLocation{bookNumber});
+            MoveWithoutBook(self,qMatrix);
+            % Back out from the book location (after gripping book)
+            self.HansCute.TriggerGripper(true);
+            MoveWithBook(self,flip(qMatrix,1),bookNumber);
+            % Now we go to the desired table location
+            qMatrix = jtraj(self.HansCute.qCurrent, self.qtable_0_q1+self.qTable_level, 50/self.speedMultiplier);
+            MoveWithBook(self,qMatrix,bookNumber);
+            % Now we slowly move the arm to place the book
+            qMatrix = self.HansCute.LinearRMRC(self.HansCute.qCurrent,self.books{bookNumber}.tableTransform*transl(0,-0.03,0));
+            MoveWithBook(self,qMatrix,bookNumber);
+            % We release the book, and move the arm back
+            self.HansCute.TriggerGripper(false);
+            MoveWithoutBook(self,flip(qMatrix,1));
+            self.books{bookNumber}.onShelf = false;
         end
         function MoveWithBook(self,qMatrix,bookNumber)
             % Does not work if we are currently stopped

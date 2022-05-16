@@ -148,6 +148,15 @@ classdef HansCute < handle %HansCuteRobot class
                 end
             end
         end
+        function TriggerGripper(self,inputBool)
+            if  inputBool %If gripper is open
+                self.gripperBool = true;
+                disp("Gripper closed");
+            else
+                self.gripperBool = false;
+                disp("Gripper released");
+            end
+        end
         
     end
 end

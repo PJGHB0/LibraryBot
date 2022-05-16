@@ -1,6 +1,7 @@
 %% Class for the book object, which needs to be animated
 classdef Book < handle
     properties
+    tableTransform;
     currentTransform;
     fileName;
     model;
@@ -19,6 +20,7 @@ classdef Book < handle
         function self = Book(startingTransform, fileName,onShelf)
             self.onShelf = onShelf;
             self.currentTransform = startingTransform;
+            self.tableTransform = startingTransform;
             self.fileName = fileName;
             [self.f,self.v,self.data] = plyread(fileName,'tri');
             self.vertexColours = [self.data.vertex.red, self.data.vertex.green, self.data.vertex.blue] / 255;
