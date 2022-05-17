@@ -14,7 +14,8 @@ classdef InterfaceClass < handle
         barrier_4;
         button_1;
         camera_1;
-        currentBookInHand
+        currentBookInHand;
+        breakFlag;
         % We list the shelf poses of the robot
         % We can choose which shelf (or table), and which level, by summing the q
         % matricies below
@@ -86,21 +87,15 @@ classdef InterfaceClass < handle
             % button_2 = Book(transl(1,-0.8,0.5),'button.ply');
             self.camera_1 = Book(transl(1,0,0.8)*trotz(-pi),'camera.PLY',false);
         end
-        function EmergencyProcedure(self,emergencyType)
-            %Upon a collision or estop being pressed, this is excecuted
-            %Emergency type - 0 for EStop, 1 for collision
-            if emergencyType == 1
-            % Collision procedure    
-            end
-            if emergencyType == 0
-            % EStop procedure
-            end
-        end
         function ReturnBook(self,bookNumber)
             % We check if book is already returned
             if self.books{bookNumber}.onShelf
                 X = ['ERROR: Book ',num2str(bookNumber),' is already on the shelf'];
                 disp(X);
+                return
+            end
+            if ~self.HansCute.running
+                disp("Cannot run system");
                 return
             end
             X = ['----------Returning Book ',num2str(bookNumber),'----------'];
@@ -130,15 +125,22 @@ classdef InterfaceClass < handle
 %             ITS UNNECESSARY)
 %             qMatrix = jtraj(self.HansCute.qCurrent, [0 0 0 0 0 0 0], 75/self.speedMultiplier);
 %             MoveWithoutBook(self,qMatrix);
-            self.books{bookNumber}.onShelf = true;
-            X = ['----------Book ',num2str(bookNumber),' Returned----------'];
-            disp(X);
+            if self.HansCute.running
+                self.books{bookNumber}.onShelf = true;
+                X = ['----------Book ',num2str(bookNumber),' Returned----------'];
+                disp(X);
+            end            
+
         end
         function GetBook(self,bookNumber)
             % We check if book is already retreived
             if ~self.books{bookNumber}.onShelf
                 X = ['ERROR: Book ',num2str(bookNumber),' is already on the table'];
                 disp(X);
+                return
+            end
+            if ~self.HansCute.running
+                disp("Cannot run system");
                 return
             end
             X = ['----------Getting Book ',num2str(bookNumber),'----------'];
@@ -163,9 +165,11 @@ classdef InterfaceClass < handle
             % We release the book, and move the arm back
             self.HansCute.TriggerGripper(false);
             MoveWithoutBook(self,flip(qMatrix,1));
-            self.books{bookNumber}.onShelf = false;
-            X = ['----------Book ',num2str(bookNumber),' Retreived----------'];
-            disp(X);
+            if self.HansCute.running
+                self.books{bookNumber}.onShelf = false;
+                X = ['----------Book ',num2str(bookNumber),' Retreived----------'];
+                disp(X);
+            end
         end
         function MoveWithBook(self,qMatrix,bookNumber)
             % Does not work if we are currently stopped
