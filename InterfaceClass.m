@@ -36,6 +36,8 @@ classdef InterfaceClass < handle
     end
     methods
         function self = InterfaceClass()        % Our constructor
+            clf;
+            clc;
             self.HansCute = HansCute();
             self.BuildEnvironment();
             self.qBooksShelfPosition{1} = self.qshelf_1_q1 + self.qShelf_Lower; % Book one has home on lower shelf 1
