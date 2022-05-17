@@ -216,6 +216,14 @@ classdef InterfaceClass < handle
                 self.HansCute.qCurrent = qMatrix(i,:);
             end
         end
+        function GoToOrigin(self)
+            if ~self.HansCute.running
+                disp("Cannot run system");
+                return
+            end
+            qMatrix = jtraj(self.HansCute.qCurrent,[0 0 0 0 0 0 0],50);
+            MoveWithoutBook(self,qMatrix);
+        end
         function [collisionPredicted,index] = CollisionPrediction(self,qMatrix)
             % Predicts a collision along a path, and the q values
             % associated
