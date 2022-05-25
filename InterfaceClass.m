@@ -39,6 +39,7 @@ classdef InterfaceClass < handle
             clf;
             clc;
             self.HansCute = HansCute();
+            axis off;
             self.BuildEnvironment();
             self.qBooksShelfPosition{1} = self.qshelf_1_q1 + self.qShelf_Lower; % Book one has home on lower shelf 1
             self.qBooksShelfPosition{2} = self.qshelf_2_q1 + self.qShelf_Mid;
@@ -189,6 +190,10 @@ classdef InterfaceClass < handle
                     self.HansCute.CollisionStop();
                     break
                 end
+                if ~self.HansCute.running
+                    disp("Cannot run system");
+                    return
+                end
                 self.HansCute.model.animate(qMatrix(i,:));
                 self.HansCute.qCurrent = qMatrix(i,:);
                 EFTransform = self.HansCute.model.fkine(qMatrix(i,:));
@@ -211,6 +216,10 @@ classdef InterfaceClass < handle
                 if collisionFlag
                     self.HansCute.CollisionStop();
                     break
+                end
+                if ~self.HansCute.running
+                    disp("Cannot run system");
+                    return
                 end
                 self.HansCute.model.animate(qMatrix(i,:));
                 self.HansCute.qCurrent = qMatrix(i,:);
